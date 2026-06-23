@@ -1,0 +1,6 @@
+# Runtime tracking data — generated locally under ~/.claude, never committed.
+statusline-costs.json
+statusline-cycle.json
+statusline-combo.json
+statusline-combo-blocks/
+statusline.sh.bak
