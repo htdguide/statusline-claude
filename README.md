@@ -5,17 +5,7 @@ One Bash script, no dependencies beyond `jq`. Truecolor gradient bars for contex
 usage and rate limits, a compact cost/velocity header, a monthly billing rollup,
 and a "combo streak" that rewards heavy 5-hour blocks.
 
-```
-my-repo (main) $1.23 | +1240 -380 | Opus 4.8
-
-ctx ██░░░░░░░░ 23%  790k    Skimming
-5h  █████████░ 91%  01:00   Excellent x3
-7d  █░░░░░░░░░ 12%  5d2h
-$48.10 | +10867 -3279 | 16d22h
-```
-
-(In a real terminal the bars are an RGB green→gold→red gradient and the numbers
-are color-coded.)
+![statusline-claude preview](preview.svg)
 
 ## What each line shows
 
