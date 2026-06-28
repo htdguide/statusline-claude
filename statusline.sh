@@ -159,7 +159,10 @@ if [ -n "$used" ]; then
   ctx_part="${ctx_part}$(pad_left "$COL_A_W" "$ctx_tok")${DIM}${ctx_tok}${RESET}$(pad_right "$COL_A_W" "$ctx_tok")"
   ctx_part="${ctx_part}   ${DIM}${ctx_word}${RESET}"
 else
-  ctx_part="${EMPTY_BAR} --%  ${DIM}${CULT_WORDS[0]}${RESET}"
+  # Mirror the loaded layout EXACTLY so the word stays at the same column when
+  # `used` hasn't loaded yet: empty bar + 4-wide "--%" field (matches render_bar's
+  # pct field) + empty COL_A pad + 3 spaces. Without this the word jumped 8 cols left.
+  ctx_part="${EMPTY_BAR} --% $(pad_left "$COL_A_W" "")$(pad_right "$COL_A_W" "")   ${DIM}${CULT_WORDS[0]}${RESET}"
 fi
 
 # ── 5-hour rate limit bar ──
@@ -294,7 +297,17 @@ if [ -n "$session_id" ]; then
         add:  ([.[$sid].add  // 0, $a] | max),
         del:  ([.[$sid].del  // 0, $d] | max)
       }' "$COST_DB" 2>/dev/null)
-  [ -n "$tmp" ] && printf '%s' "$tmp" > "$COST_DB"
+  # Atomic write (temp + rename) so concurrent renders from multiple sessions
+  # can't tear the file mid-write — a torn write here blanks total_cost and
+  # drops the totals line entirely. Mirrors the combo DB write above.
+  if [ -n "$tmp" ]; then
+    cost_tmp="$COST_DB.$$.tmp"
+    if printf '%s' "$tmp" > "$cost_tmp" 2>/dev/null; then
+      mv -f "$cost_tmp" "$COST_DB" 2>/dev/null
+    else
+      rm -f "$cost_tmp" 2>/dev/null
+    fi
+  fi
   read -r total_cost total_add total_del < <(jq -r \
     '[([.[].cost] | add // 0), ([.[].add] | add // 0), ([.[].del] | add // 0)] | @tsv' \
     "$COST_DB" 2>/dev/null)
